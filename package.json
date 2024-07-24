@@ -1,0 +1,56 @@
+{
+  "name": "fileai",
+  "version": "1.0.0",
+  "description": "Progress file with chatgpt",
+  "main": "dist/index.js",
+  "bin": {
+    "fileai": "./bin/cli"
+  },
+  "scripts": {
+    "dev": "ts-node ./src/index.ts",
+    "build": "tsup ./src/index.ts",
+    "prepare": "npm run build",
+    "watch": "tsc -w",
+    "release": "npm publish --registry https://registry.npmjs.com/"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonrailgun/fileai.git"
+  },
+  "keywords": [
+    "chatgpt",
+    "file",
+    "fileai",
+    "convert"
+  ],
+  "author": "moonrailgun <moonrailgun@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.14.11",
+    "@types/update-notifier": "^6.0.8",
+    "@types/yargs": "^17.0.32",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.2.2",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.2.18",
+    "@langchain/openai": "^0.2.4",
+    "chalk": "^4.1.2",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^8.2.6",
+    "langchain": "^0.2.10",
+    "ora": "^8.0.1",
+    "update-notifier": "^5.1.0",
+    "yargs": "^17.7.2"
+  }
+}

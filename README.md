@@ -1,2 +1,2 @@
-# file-gpt
+# fileai
 Progress file with chatgpt
