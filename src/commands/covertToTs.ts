@@ -4,10 +4,10 @@ import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import fg from 'fast-glob';
 import chalk from 'chalk';
-import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { env } from '../env';
 import { CodeOutputParser } from '../utils/CodeOutputParser';
+import { getLLMModel } from '../utils/llm';
 
 export const covertToTsCommand: CommandModule = {
   command: 'convertToTs <file>',
@@ -39,17 +39,18 @@ export const covertToTsCommand: CommandModule = {
 
     const { openaiApiKey, modelName, generateType } = await inquirer.prompt([
       {
+        type: 'list',
+        name: 'modelName',
+        message: 'Which LLM Model did you want use?',
+        choices: ['deepseek-coder', 'deepseek-chat', 'gpt-4o-mini'],
+        default: 'deepseek-coder',
+      },
+      {
         type: 'input',
         name: 'openaiApiKey',
         message: 'Whats your openai api key?',
         default: env.openaiApiKey,
         when: () => !Boolean(env.openaiApiKey),
-      },
-      {
-        type: 'list',
-        name: 'modelName',
-        choices: ['deepseek-coder', 'deepseek-chat', 'gpt-4o-mini'],
-        default: 'deepseek-coder',
       },
       {
         type: 'list',
@@ -62,21 +63,7 @@ export const covertToTsCommand: CommandModule = {
       },
     ]);
 
-    const configuration: NonNullable<
-      ConstructorParameters<typeof ChatOpenAI>[0]
-    >['configuration'] = {};
-    if (['deepseek-coder', 'deepseek-chat'].includes(modelName)) {
-      configuration.baseURL = 'https://api.deepseek.com/';
-    }
-
-    const llm = new ChatOpenAI({
-      model: modelName,
-      openAIApiKey: openaiApiKey,
-      configuration,
-      temperature: 0,
-      streaming: false,
-      timeout: 5000,
-    });
+    const llm = getLLMModel(modelName, openaiApiKey);
 
     const parser = new CodeOutputParser();
 
@@ -91,7 +78,7 @@ export const covertToTsCommand: CommandModule = {
     for (const p of fileList) {
       const newFilePath = p.replace(/\.js$/, '.ts');
 
-      const code = await fs.readFile(fileList[0]);
+      const code = await fs.readFile(p);
 
       const res = await promptTemplate
         .pipe(llm)
