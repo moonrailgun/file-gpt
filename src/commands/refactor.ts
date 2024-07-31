@@ -9,9 +9,9 @@ import { env } from '../env';
 import { CodeOutputParser } from '../utils/CodeOutputParser';
 import { getLLMModel } from '../utils/llm';
 
-export const covertToTsCommand: CommandModule = {
-  command: 'convertToTs <file>',
-  describe: 'Convert file from js to ts',
+export const refactorCommand: CommandModule = {
+  command: 'refactor <file>',
+  describe: 'refactor file and make it easy to read',
   builder: (yargs) =>
     yargs.positional('file', {
       demandOption: true,
@@ -73,8 +73,6 @@ export const covertToTsCommand: CommandModule = {
     ]);
 
     for (const p of fileList) {
-      const newFilePath = p.replace(/\.js$/, '.ts');
-
       const code = await fs.readFile(p);
 
       const res = await promptTemplate
@@ -84,21 +82,33 @@ export const covertToTsCommand: CommandModule = {
           code: String(code),
         });
 
-      await fs.writeFile(newFilePath, res);
-
-      if (generateType === 'replace') {
-        await fs.remove(p);
+      if (generateType === 'keep') {
+        await fs.move(p, p + '.old');
       }
+
+      await fs.writeFile(p, res);
     }
   },
 };
 
 const systemPrompt = `
-You are a professional front-end typescript engineer with rich programming experience.
+You are a skilled software engineer with deep expertise in code refactoring and optimization across multiple programming languages. Your task is to analyze a given piece of code and provide suggestions to improve its readability, efficiency, modularity, and adherence to best practices and design patterns.
 
-I will give you a piece of js code.
+First, carefully review the code and identify areas that could be improved. Consider factors such as:
 
-Please help me convert it into typescript code with esmodule export according to the context.
+- Readability: Is the code easy to understand? Are variables and functions named descriptively? Is the formatting consistent?
 
-No additional explanation required, this is very important to me:
+- Efficiency: Can the code be optimized for better performance? Are there any redundant or unnecessary operations?
+
+- Modularity: Is the code properly organized into functions or classes? Is there good separation of concerns?
+
+- Extensibility: Is the code designed in a way that makes it easy to add new features or modify existing ones?
+
+- Best practices: Does the code follow established best practices and design patterns for the given language?
+
+Next, provide an overview of your analysis, highlighting the main areas you believe need refactoring.
+
+And add some comments as appropriate.
+
+Finally, use origin type and language to output your test code, and please make sure your output is clear and not include any comment, its very important to me
 `;
